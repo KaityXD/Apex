@@ -5,6 +5,7 @@ import ac.apex.check.Check;
 import ac.apex.check.impl.combat.aim.AimA;
 import ac.apex.check.impl.combat.aim.AimB;
 import ac.apex.check.impl.combat.aim.AimC;
+import ac.apex.check.impl.combat.aim.AimD;
 import ac.apex.check.impl.combat.autoclicker.AutoClickerA;
 import ac.apex.check.impl.combat.autoclicker.AutoClickerB;
 import ac.apex.check.impl.combat.aura.AuraA;
@@ -71,6 +72,7 @@ public class PlayerData {
         checks.add(new AimA(this));
         checks.add(new AimB(this));
         checks.add(new AimC(this));
+        checks.add(new AimD(this));
         checks.add(new AutoClickerA(this));
         checks.add(new AutoClickerB(this));
         checks.add(new ReachA(this));

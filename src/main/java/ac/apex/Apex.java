@@ -188,6 +188,10 @@ public class Apex extends JavaPlugin implements Listener {
             ac.apex.check.impl.combat.aura.AuraA aura = pd.get(ac.apex.check.impl.combat.aura.AuraA.class);
             if (aura != null) aura.process(attacker, victimLoc, w, h);
         } catch (Throwable ignored) {}
+        try {
+            ac.apex.check.impl.combat.aim.AimD aimd = pd.get(ac.apex.check.impl.combat.aim.AimD.class);
+            if (aimd != null) aimd.process(attacker, victimLoc, w, h);
+        } catch (Throwable ignored) {}
     }
 
     public boolean toggleAlerts(Player player) {

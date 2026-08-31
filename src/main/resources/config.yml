@@ -113,6 +113,12 @@ checks:
       auto-ban: true
       max-vl: 8
       ban-duration: "30d"
+    aim-precision:
+      enabled: true
+      threshold: 0.05
+      auto-ban: true
+      max-vl: 6
+      ban-duration: "14d"
   world:
     break:
       enabled: true
