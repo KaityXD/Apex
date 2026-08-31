@@ -1,0 +1,19 @@
+name: Apex
+version: ${version}
+main: ac.apex.Apex
+api-version: '1.20'
+author: Kat
+description: Next-Generation Hybrid Deterministic & Heuristic Anti-Cheat
+folia-supported: true
+commands:
+  apex:
+    description: Apex Anti-Cheat management command
+    permission: apex.admin
+    aliases: [ac, anticheat]
+permissions:
+  apex.admin:
+    description: Full administrative access to Apex
+    default: op
+  apex.alerts:
+    description: Receive detection alerts
+    default: op

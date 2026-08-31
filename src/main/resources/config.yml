@@ -1,0 +1,85 @@
+# Apex Anti-Cheat config
+prefix: "&#00f2fe&lAPEX &8» &7"
+
+alerts:
+  permission: "apex.alerts"
+  format: "&8[&#00f2fe&lAPEX&8] &b%player% &7failed &f%check% &8(&7VL: &b%vl%&8)"
+  click-to-teleport: true
+
+punishments:
+  appeal-url: "https://discord.gg/your-server"
+  broadcast:
+    enabled: true
+    format: "&8[&#00f2fe&lAPEX&8] &b%player% &7was suspended by Apex for &c%reason% &8(&f%check%&8)"
+  ban-screen:
+    - "&8&m                                        "
+    - "&c&l      NETWORK SUSPENSION"
+    - "&8&m                                        "
+    - ""
+    - " &7Your connection was terminated by &b&lAPEX"
+    - " &7for unfair gameplay."
+    - ""
+    - " &8» &7Account&8: &f%player%"
+    - " &8» &7Reason&8: &c%reason%"
+    - " &8» &7Check&8: &e%check%"
+    - " &8» &7Expires&8: &b%expires%"
+    - " &8» &7Reference&8: &8%id%"
+    - ""
+    - " &7If you believe this is an error,"
+    - " &7please appeal at:"
+    - " &b%appeal%"
+    - ""
+    - "&8&m                                        "
+
+checks:
+  movement:
+    simulation:
+      enabled: true
+      max-buffer: 3.5
+      setback: true
+      auto-ban: true
+      max-vl: 30
+      ban-duration: "30d"
+    ground-spoof:
+      enabled: true
+      setback: true
+      auto-ban: false
+      max-vl: 20
+      ban-duration: "14d"
+    timer:
+      enabled: true
+      setback: true
+      auto-ban: false
+      max-vl: 25
+      ban-duration: "14d"
+  combat:
+    rotation-gcd:
+      enabled: true
+      cancel-attack: true
+      auto-ban: true
+      max-vl: 20
+      ban-duration: "30d"
+    rotation-snap:
+      enabled: true
+      cancel-attack: true
+      auto-ban: true
+      max-vl: 10
+      ban-duration: "30d"
+    click-entropy:
+      enabled: true
+      auto-ban: true
+      max-vl: 12
+      ban-duration: "14d"
+    reach:
+      enabled: true
+      max-reach: 3.05
+      cancel-attack: true
+      auto-ban: true
+      max-vl: 15
+      ban-duration: "30d"
+    aura:
+      enabled: true
+      cancel-attack: true
+      auto-ban: true
+      max-vl: 8
+      ban-duration: "30d"
