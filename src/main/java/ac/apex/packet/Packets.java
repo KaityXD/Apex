@@ -6,11 +6,16 @@ import ac.apex.check.impl.combat.autoclicker.*;
 import ac.apex.check.impl.movement.ground.GroundSpoofA;
 import ac.apex.check.impl.movement.motion.MotionA;
 import ac.apex.check.impl.movement.timer.TimerA;
+import ac.apex.check.impl.world.block.BreakA;
+import ac.apex.check.impl.world.block.PlaceA;
 import ac.apex.data.PlayerData;
 import com.github.retrooper.packetevents.event.PacketListener;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.protocol.player.DiggingAction;
+import com.github.retrooper.packetevents.util.Vector3i;
 import com.github.retrooper.packetevents.wrapper.play.client.*;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class Packets implements PacketListener {
@@ -59,6 +64,30 @@ public class Packets implements PacketListener {
             else if (act == WrapperPlayClientEntityAction.Action.STOP_SPRINTING) d.setSprint(false);
             else if (act == WrapperPlayClientEntityAction.Action.START_SNEAKING) d.setSneak(true);
             else if (act == WrapperPlayClientEntityAction.Action.STOP_SNEAKING) d.setSneak(false);
+        } else if (e.getPacketType() == PacketType.Play.Client.PLAYER_DIGGING) {
+            WrapperPlayClientPlayerDigging dig = new WrapperPlayClientPlayerDigging(e);
+            DiggingAction action = dig.getAction();
+            if (action == DiggingAction.START_DIGGING || action == DiggingAction.FINISHED_DIGGING) {
+                Vector3i bp = dig.getBlockPosition();
+                try {
+                    Location loc = new Location(p.getWorld(), bp.getX(), bp.getY(), bp.getZ());
+                    BreakA check = d.get(BreakA.class);
+                    if (check != null) check.process(p, loc);
+                } catch (Throwable ignored) {}
+            }
+        } else if (e.getPacketType() == PacketType.Play.Client.PLAYER_BLOCK_PLACEMENT) {
+            WrapperPlayClientPlayerBlockPlacement place = new WrapperPlayClientPlayerBlockPlacement(e);
+            try {
+                Vector3i bp = place.getBlockPosition();
+                Location loc = new Location(p.getWorld(), bp.getX(), bp.getY(), bp.getZ());
+                Location target = loc;
+                try {
+                    com.github.retrooper.packetevents.protocol.world.BlockFace face = place.getFace();
+                    if (face != null) target = loc.clone().add(face.getModX(), face.getModY(), face.getModZ());
+                } catch (Throwable ignored) {}
+                PlaceA check = d.get(PlaceA.class);
+                if (check != null) check.process(p, target);
+            } catch (Throwable ignored) {}
         }
     }
 

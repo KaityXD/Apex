@@ -12,6 +12,8 @@ import ac.apex.check.impl.combat.reach.ReachA;
 import ac.apex.check.impl.movement.ground.GroundSpoofA;
 import ac.apex.check.impl.movement.motion.MotionA;
 import ac.apex.check.impl.movement.timer.TimerA;
+import ac.apex.check.impl.world.block.BreakA;
+import ac.apex.check.impl.world.block.PlaceA;
 import ac.apex.compat.Platform;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.player.ClientVersion;
@@ -64,6 +66,8 @@ public class PlayerData {
         checks.add(new MotionA(this));
         checks.add(new GroundSpoofA(this));
         checks.add(new TimerA(this));
+        checks.add(new BreakA(this));
+        checks.add(new PlaceA(this));
     }
 
     public <T extends Check> T get(Class<T> clazz) {

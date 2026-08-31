@@ -12,24 +12,14 @@ punishments:
     enabled: true
     format: "&8[&#00f2fe&lAPEX&8] &b%player% &7was suspended by Apex for &c%reason% &8(&f%check%&8)"
   ban-screen:
-    - "&8&m                                        "
-    - "&c&l      NETWORK SUSPENSION"
-    - "&8&m                                        "
+    - "&cYou have been suspended"
     - ""
-    - " &7Your connection was terminated by &b&lAPEX"
-    - " &7for unfair gameplay."
+    - "&7Reason: &f%reason%"
+    - "&7Check: &f%check%"
+    - "&7Expires: &f%expires%"
+    - "&7ID: &8%id%"
     - ""
-    - " &8» &7Account&8: &f%player%"
-    - " &8» &7Reason&8: &c%reason%"
-    - " &8» &7Check&8: &e%check%"
-    - " &8» &7Expires&8: &b%expires%"
-    - " &8» &7Reference&8: &8%id%"
-    - ""
-    - " &7If you believe this is an error,"
-    - " &7please appeal at:"
-    - " &b%appeal%"
-    - ""
-    - "&8&m                                        "
+    - "&7Appeal at: &b%appeal%"
 
 checks:
   movement:
@@ -83,3 +73,14 @@ checks:
       auto-ban: true
       max-vl: 8
       ban-duration: "30d"
+  world:
+    break:
+      enabled: true
+      auto-ban: true
+      max-vl: 6
+      ban-duration: "14d"
+    place:
+      enabled: true
+      auto-ban: true
+      max-vl: 6
+      ban-duration: "14d"
