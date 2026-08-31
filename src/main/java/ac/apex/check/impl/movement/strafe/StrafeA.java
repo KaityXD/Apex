@@ -7,7 +7,7 @@ import ac.apex.data.PlayerData;
 import ac.apex.util.Maths;
 import org.bukkit.entity.Player;
 
-@CheckInfo(name = "Strafe", type = "A", description = "Detects invalid strafe movement", category = Category.MOVEMENT)
+@CheckInfo(name = "Strafe", type = "A", description = "Detects invalid strafe movement", category = Category.MOVEMENT, config = "strafe")
 public class StrafeA extends Check {
     private double buf = 0.0;
 
@@ -27,6 +27,10 @@ public class StrafeA extends Check {
             if (p.isGliding() || p.isSwimming()) { buf = Math.max(0, buf - 0.6); return; }
         } catch (Throwable ignored) {}
         if (data.cachedInLiquid() || data.cachedSpecialBlock() || data.cachedMovementPotion()) {
+            buf = Math.max(0, buf - 0.5);
+            return;
+        }
+        if (data.cachedEntityPush()) {
             buf = Math.max(0, buf - 0.5);
             return;
         }
@@ -58,7 +62,7 @@ public class StrafeA extends Check {
             debug(String.format("strafe hDist=%.3f limit=%.2f diff=%.1f buf=%.1f ping=%d", hDist, limit, diff, buf, ping));
             if (buf >= 6.0) {
                 fail(String.format("hDist=%.3f limit=%.2f diff=%.1f ping=%d", hDist, limit, diff, ping), 1.0);
-                data.setback();
+                setback();
                 buf = Math.max(2.0, buf - 3.0);
             }
         } else {

@@ -10,7 +10,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
 
-@CheckInfo(name = "Motion", type = "A", description = "Lenient heuristic physics with multi-friction/speed hypotheses", category = Category.MOVEMENT)
+@CheckInfo(name = "Motion", type = "A", description = "Lenient heuristic physics with multi-friction/speed hypotheses", category = Category.MOVEMENT, config = "simulation")
 public class MotionA extends Check {
     private double buf = 0.0;
 
@@ -44,6 +44,12 @@ public class MotionA extends Check {
 
         if (data.cachedInLiquid() || isInLiquidOrClimbable(p)) {
             buf = Math.max(0, buf - 1.5);
+            data.vel(dx, dz);
+            return;
+        }
+
+        if (data.cachedEntityPush()) {
+            buf = Math.max(0, buf - 0.75);
             data.vel(dx, dz);
             return;
         }
@@ -133,7 +139,7 @@ public class MotionA extends Check {
             debug(String.format("motion offset=%.3f eps=%.3f inc=%.2f buf=%.1f hDist=%.3f ping=%d", best, epsilon, inc, buf, hDist, ping));
             if (buf > BUFFER_THRESHOLD) {
                 fail(String.format("offset=%.3f, buf=%.1f, ping=%d", best, buf, ping), 1.0);
-                data.setback();
+                setback();
                 buf = Math.max(0, buf - 3.5);
             }
         } else if (best > epsilon && hDist <= 0.20 && hDist >= 0.08) {
@@ -153,7 +159,7 @@ public class MotionA extends Check {
                 buf += 0.9;
                 if (buf > BUFFER_THRESHOLD) {
                     fail(String.format("speed hDist=%.3f limit=%.2f ping=%d", hDist, speedLimit, ping), 1.0);
-                    data.setback();
+                    setback();
                     buf = Math.max(0, buf - 3.5);
                 }
             }
@@ -252,13 +258,5 @@ public class MotionA extends Check {
 
     private boolean isSwimming(Player p) {
         try { return p.isSwimming(); } catch (Throwable e) { return false; }
-    }
-
-    private boolean isClimbing(Player p) {
-        try {
-            Object o = p.getClass().getMethod("isClimbing").invoke(p);
-            if (o instanceof Boolean) return (Boolean) o;
-        } catch (Throwable ignored) {}
-        return false;
     }
 }

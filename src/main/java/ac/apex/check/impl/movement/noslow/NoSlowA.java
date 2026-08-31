@@ -7,7 +7,7 @@ import ac.apex.data.PlayerData;
 import ac.apex.util.Maths;
 import org.bukkit.entity.Player;
 
-@CheckInfo(name = "NoSlow", type = "A", description = "Detects moving too fast while sneaking or using item", category = Category.MOVEMENT)
+@CheckInfo(name = "NoSlow", type = "A", description = "Detects moving too fast while sneaking or using item", category = Category.MOVEMENT, config = "noslow")
 public class NoSlowA extends Check {
     private double buf = 0.0;
 
@@ -27,6 +27,10 @@ public class NoSlowA extends Check {
             buf = Math.max(0, buf - 0.5);
             return;
         }
+        if (data.cachedEntityPush()) {
+            buf = Math.max(0, buf - 0.5);
+            return;
+        }
         long ping = data.ping().ms();
         if (ping > 300) {
             buf = Math.max(0, buf - 0.4);
@@ -41,9 +45,9 @@ public class NoSlowA extends Check {
             return;
         }
 
-        double limit = sneaking ? 0.22 : 0.30;
-        if (blocking) limit = 0.22;
-        if (sneaking && blocking) limit = 0.18;
+        double walk = data.cachedMoveSpeed() * 2.2;
+        double limit = sneaking ? 0.15 : walk + 0.04;
+        if (sneaking && blocking) limit = 0.15;
 
         if (hDist > limit && hDist > 0.12) {
             double excess = hDist - limit;
@@ -51,7 +55,7 @@ public class NoSlowA extends Check {
             debug(String.format("noslow hDist=%.3f limit=%.2f sneak=%b block=%b buf=%.1f", hDist, limit, sneaking, blocking, buf));
             if (buf >= 5.0) {
                 fail(String.format("hDist=%.3f limit=%.2f sneak=%b block=%b ping=%d", hDist, limit, sneaking, blocking, ping), 1.0);
-                data.setback();
+                setback();
                 buf = 2.0;
             }
         } else {

@@ -62,6 +62,8 @@ public class PlayerData {
     private volatile double cachedMoveSpeed = 0.1;
     private volatile boolean inventoryOpen = false;
     private volatile boolean usingItem = false;
+    private volatile long usingItemSince = 0;
+    private volatile boolean cachedEntityPush = false;
 
     public PlayerData(Player player) {
         this.p = player;
@@ -226,7 +228,7 @@ public class PlayerData {
     public void setInv(boolean o) { setInventoryOpen(o); }
     public boolean isUsingItem() { return usingItem; }
     public boolean isUse() { return usingItem; }
-    public void setUsingItem(boolean u) { this.usingItem = u; }
+    public void setUsingItem(boolean u) { this.usingItem = u; this.usingItemSince = u ? System.currentTimeMillis() : 0; }
     public void setUse(boolean u) { setUsingItem(u); }
     public Player pl() { return p; }
     public String n() { return name(); }
@@ -293,8 +295,24 @@ public class PlayerData {
             }
         } catch (Throwable ignored) {}
         try {
-            if (p.getVelocity().lengthSquared() > 0.015) lastVelocityMs = System.currentTimeMillis();
+            if (p.getVelocity().lengthSquared() > 0.004) lastVelocityMs = System.currentTimeMillis();
         } catch (Throwable ignored) {}
+        try {
+            boolean push = false;
+            for (org.bukkit.entity.Entity e : p.getNearbyEntities(1.0, 1.0, 1.0)) {
+                if (e == p) continue;
+                if (e instanceof Player && ((Player) e).getGameMode() == org.bukkit.GameMode.SPECTATOR) continue;
+                push = true;
+                break;
+            }
+            cachedEntityPush = push;
+        } catch (Throwable ignored) {
+            cachedEntityPush = false;
+        }
+        if (usingItem && usingItemSince != 0 && System.currentTimeMillis() - usingItemSince > 1500) {
+            usingItem = false;
+            usingItemSince = 0;
+        }
     }
 
     public boolean cachedFlying() { return cachedFlying; }
@@ -307,4 +325,5 @@ public class PlayerData {
     public boolean cachedSpecialBlock() { return cachedSpecialBlock; }
     public boolean cachedMovementPotion() { return cachedMovementPotion; }
     public double cachedMoveSpeed() { return cachedMoveSpeed; }
+    public boolean cachedEntityPush() { return cachedEntityPush; }
 }
