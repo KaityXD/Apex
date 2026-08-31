@@ -37,9 +37,8 @@ public abstract class Check {
         }
     }
 
-    public String tag() {
-        return name + " (" + type + ")";
-    }
+    public String tag() { return name + " (" + type + ")"; }
+    public String t() { return tag(); }
 
     public void fail(String info, double weight) {
         if (!enabled) return;
@@ -88,14 +87,14 @@ public abstract class Check {
         }
 
         if (autoBan && curVl >= maxVl) {
-            try { plugin.punish().execute(data.player(), "Unfair Advantage", tag, duration); } catch (Throwable ignored) {}
+            try { plugin.p().ban(data.pl(), "Unfair Advantage", tag, duration); } catch (Throwable ignored) {}
             vl = 0.0;
         }
     }
 
-    public void fail(String info) {
-        fail(info, 1.0);
-    }
+    public void fail(String info) { fail(info, 1.0); }
+    public void f(String info) { fail(info, 1.0); }
+    public void f(String info, double w) { fail(info, w); }
 
     public void debug(String info) {
         Apex plugin = Apex.get();
@@ -109,8 +108,10 @@ public abstract class Check {
         if (Platform.isPrimary()) t.run();
         else try { Platform.global(plugin, t); } catch (Throwable ignored) { try { Bukkit.getScheduler().runTask(plugin, t); } catch (Throwable ignored2) {} }
     }
+    public void dbg(String info) { debug(info); }
 
     public void decay(double n) { this.vl = Math.max(0.0, this.vl - n); }
+    public void dec(double n) { decay(n); }
     public String name() { return name; }
     public String type() { return type; }
     public Category cat() { return cat; }

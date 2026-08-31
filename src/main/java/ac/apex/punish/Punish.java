@@ -2,10 +2,8 @@ package ac.apex.punish;
 
 import ac.apex.Apex;
 import ac.apex.compat.Platform;
+import ac.apex.db.DB;
 import ac.apex.util.Chat;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,16 +13,13 @@ import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Punish implements Listener {
     private final Apex plugin;
     private final Map<UUID, Ban> bans = new ConcurrentHashMap<>();
-    private final File file;
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private final DB db = DB.i();
     private volatile List<String> cachedScreen = null;
     private volatile String cachedAppeal = "https://discord.gg/your-server";
     private volatile String cachedBroadcastFmt = "&8[&b&lAPEX&8] &b%player% &7was removed by Apex for &c%reason% &8(&f%check%&8)";
@@ -32,13 +27,13 @@ public class Punish implements Listener {
 
     public Punish(Apex plugin) {
         this.plugin = plugin;
-        this.file = new File(plugin.getDataFolder(), "data/bans.json");
-        load();
-        cacheConfig();
+        try { db.init(plugin); } catch (Exception e) { e.printStackTrace(); }
+        ld();
+        cache();
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    private void cacheConfig() {
+    private void cache() {
         try {
             List<String> lines = plugin.getConfig().getStringList("punishments.ban-screen");
             if (lines != null && !lines.isEmpty()) cachedScreen = new ArrayList<>(lines);
@@ -50,50 +45,50 @@ public class Punish implements Listener {
         } catch (Throwable ignored) {}
     }
 
-    public void reloadCache() { cacheConfig(); }
+    public void reload() { cache(); }
+    public void reloadCache() { cache(); }
 
-    public void execute(Player p, String reason, String check, String time) {
-        long dur = parse(time);
+    public void ban(Player p, String reason, String check, String time) {
+        long dur = par(time);
         long now = System.currentTimeMillis();
         long exp = (dur <= 0) ? -1 : now + dur;
         String id = "#APX-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
-
-        Ban ban = new Ban(id, p.getUniqueId(), p.getName(), reason, check, now, exp);
-        bans.put(p.getUniqueId(), ban);
-        save();
-
-        String scr = screen(ban);
-        Platform.entity(plugin, p, e -> ((Player) e).kickPlayer(scr));
-        broadcast(ban);
+        Ban b = new Ban(id, p.getUniqueId(), p.getName(), reason, check, now, exp);
+        bans.put(p.getUniqueId(), b);
+        try { db.add(b); } catch (Throwable ignored) {}
+        String s = scr(b);
+        Platform.entity(plugin, p, e -> ((Player) e).kickPlayer(s));
+        bc(b);
     }
 
-    public boolean unban(String name) {
+    public void execute(Player p, String reason, String check, String time) { ban(p, reason, check, time); }
+
+    public boolean un(String name) {
         for (Map.Entry<UUID, Ban> e : bans.entrySet()) {
             if (e.getValue().name().equalsIgnoreCase(name)) {
                 bans.remove(e.getKey());
-                save();
+                try { db.del(e.getKey()); } catch (Throwable ignored) {}
+                try { db.del(name); } catch (Throwable ignored) {}
                 return true;
             }
         }
         return false;
     }
 
-    public String screen(Ban b) {
+    public boolean unban(String name) { return un(name); }
+
+    public String scr(Ban b) {
         List<String> lines = cachedScreen;
         if (lines == null || lines.isEmpty()) {
             try { lines = plugin.getConfig().getStringList("punishments.ban-screen"); } catch (Throwable ignored) {}
-            if (lines == null || lines.isEmpty()) {
-                lines = Arrays.asList("&c&lSUSPENDED BY APEX", "&7Reason: &f%reason%", "&7Expires: &e%expires%");
-            }
+            if (lines == null || lines.isEmpty()) lines = Arrays.asList("&c&lSUSPENDED BY APEX", "&7Reason: &f%reason%", "&7Expires: &e%expires%");
         }
-
         String expStr = b.perm() ? "Permanent" : fmt(b.expiry() - System.currentTimeMillis());
         String appeal = cachedAppeal;
         try {
             String live = plugin.getConfig().getString("punishments.appeal-url");
             if (live != null && !live.isEmpty()) appeal = live;
         } catch (Throwable ignored) {}
-
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < lines.size(); i++) {
             String l = lines.get(i)
@@ -109,24 +104,27 @@ public class Punish implements Listener {
         return sb.toString();
     }
 
+    public String screen(Ban b) { return scr(b); }
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onLogin(AsyncPlayerPreLoginEvent e) {
         Ban b = bans.get(e.getUniqueId());
+        if (b == null) {
+            try { b = db.get(e.getUniqueId()); if (b != null) bans.put(e.getUniqueId(), b); } catch (Throwable ignored) {}
+        }
         if (b != null) {
             if (b.expired()) {
                 bans.remove(e.getUniqueId());
-                save();
+                try { db.del(e.getUniqueId()); } catch (Throwable ignored) {}
                 return;
             }
-            e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, screen(b));
+            e.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, scr(b));
         }
     }
 
-    private void broadcast(Ban b) {
+    private void bc(Ban b) {
         if (!cachedBroadcastEnabled) {
-            try {
-                if (!plugin.getConfig().getBoolean("punishments.broadcast.enabled", true)) return;
-            } catch (Throwable ignored) { return; }
+            try { if (!plugin.getConfig().getBoolean("punishments.broadcast.enabled", true)) return; } catch (Throwable ignored) { return; }
         }
         String fmt = cachedBroadcastFmt;
         try {
@@ -134,7 +132,7 @@ public class Punish implements Listener {
             if (live != null && !live.isEmpty()) fmt = live;
         } catch (Throwable ignored) {}
         final String finalFmt = fmt;
-        Runnable task = () -> {
+        Runnable t = () -> {
             try {
                 Bukkit.broadcastMessage(Chat.color(finalFmt
                         .replace("%player%", b.name())
@@ -144,14 +142,16 @@ public class Punish implements Listener {
             } catch (Throwable ignored) {}
         };
         try {
-            if (Platform.isPrimary()) task.run();
-            else Platform.global(plugin, task);
+            if (Platform.isPrimary()) t.run();
+            else Platform.global(plugin, t);
         } catch (Throwable ignored) {
-            try { Bukkit.getScheduler().runTask(plugin, task); } catch (Throwable ignored2) {}
+            try { Bukkit.getScheduler().runTask(plugin, t); } catch (Throwable ignored2) {}
         }
     }
 
-    public static long parse(String s) {
+    private void broadcast(Ban b) { bc(b); }
+
+    public static long par(String s) {
         if (s == null || s.isEmpty() || s.equalsIgnoreCase("perm")) return -1;
         long total = 0;
         StringBuilder num = new StringBuilder();
@@ -171,6 +171,8 @@ public class Punish implements Listener {
         return total > 0 ? total : (num.length() > 0 ? Long.parseLong(num.toString()) * 86400000L : -1);
     }
 
+    public static long parse(String s) { return par(s); }
+
     public static String fmt(long ms) {
         if (ms <= 0) return "Expired";
         long s = ms / 1000, d = s / 86400, h = (s % 86400) / 3600, m = (s % 3600) / 60;
@@ -182,19 +184,30 @@ public class Punish implements Listener {
         return sb.toString().trim();
     }
 
-    private void load() {
-        if (!file.exists()) return;
-        try (FileReader r = new FileReader(file)) {
-            Type t = new TypeToken<Map<UUID, Ban>>() {}.getType();
-            Map<UUID, Ban> d = gson.fromJson(r, t);
-            if (d != null) bans.putAll(d);
-        } catch (Exception ignored) {}
+    private void ld() {
+        try {
+            Map<UUID, Ban> m = db.all();
+            if (m != null && !m.isEmpty()) bans.putAll(m);
+        } catch (Throwable ignored) {}
+        try {
+            File f = new File(plugin.getDataFolder(), "data/bans.json");
+            if (f.exists() && bans.isEmpty()) {
+                try (FileReader r = new FileReader(f)) {
+                    com.google.gson.Gson g = new com.google.gson.Gson();
+                    java.lang.reflect.Type t = new com.google.gson.reflect.TypeToken<Map<UUID, Ban>>() {}.getType();
+                    Map<UUID, Ban> d = g.fromJson(r, t);
+                    if (d != null) {
+                        for (Ban b : d.values()) try { db.add(b); } catch (Throwable ignored) {}
+                        bans.putAll(d);
+                    }
+                } catch (Exception ignored) {}
+            }
+        } catch (Throwable ignored) {}
     }
 
-    private synchronized void save() {
-        try {
-            if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
-            try (FileWriter w = new FileWriter(file)) { gson.toJson(bans, w); }
-        } catch (Exception ignored) {}
-    }
+    private void load() { ld(); }
+
+    public Map<UUID, Ban> all() { return bans; }
+    public boolean has(UUID u) { Ban b = bans.get(u); if (b != null) return !b.expired(); try { b = db.get(u); return b != null && !b.expired(); } catch (Throwable e) { return false; } }
+    public Ban get(UUID u) { Ban b = bans.get(u); if (b != null) return b; try { return db.get(u); } catch (Throwable e) { return null; } }
 }

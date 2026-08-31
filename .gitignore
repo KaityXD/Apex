@@ -20,3 +20,6 @@ bin/
 secrets.properties
 local.properties
 data/bans.json
+*.db
+*.sqlite
+data.db

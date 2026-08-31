@@ -214,14 +214,29 @@ public class PlayerData {
     public long lastSwing() { return lastSwing; }
 
     public void setSprint(boolean s) { this.sprint = s; }
+    public void sSpr(boolean s) { setSprint(s); }
     public void setSneak(boolean s) { this.sneak = s; }
+    public void sSnk(boolean s) { setSneak(s); }
     public void setTeleporting(boolean t) { this.teleporting = t; }
     public void setLastAttack(long t) { this.lastAttack = t; }
     public void setLastSwing(long t) { this.lastSwing = t; }
     public boolean isInventoryOpen() { return inventoryOpen; }
+    public boolean isInv() { return inventoryOpen; }
     public void setInventoryOpen(boolean o) { this.inventoryOpen = o; }
+    public void setInv(boolean o) { setInventoryOpen(o); }
     public boolean isUsingItem() { return usingItem; }
+    public boolean isUse() { return usingItem; }
     public void setUsingItem(boolean u) { this.usingItem = u; }
+    public void setUse(boolean u) { setUsingItem(u); }
+    public Player pl() { return p; }
+    public String n() { return name(); }
+    public Ping pg() { return ping; }
+    public <T extends Check> T g(Class<T> c) { return get(c); }
+    public void sb() { setback(); }
+    public void tp(Location loc) { markTeleport(loc); }
+    public void velM() { markVelocity(); }
+    public boolean hasVel(long ms) { return hasRecentVelocity(ms); }
+    public void tick() { tickUpdate(); }
 
     public void tickUpdate() {
         try { cachedFlying = p.isFlying(); } catch (Throwable ignored) {}

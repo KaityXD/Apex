@@ -4,6 +4,7 @@ import ac.apex.command.Command;
 import ac.apex.compat.Platform;
 import ac.apex.data.Data;
 import ac.apex.data.PlayerData;
+import ac.apex.db.DB;
 import ac.apex.packet.Packets;
 import ac.apex.punish.Punish;
 import com.github.retrooper.packetevents.PacketEvents;
@@ -33,13 +34,9 @@ public class Apex extends JavaPlugin implements Listener {
     private final Set<UUID> alertStaff = ConcurrentHashMap.newKeySet();
     private final Set<UUID> verboseStaff = ConcurrentHashMap.newKeySet();
 
-    public static Apex get() {
-        return instance;
-    }
-
-    public static Apex getInstance() {
-        return instance;
-    }
+    public static Apex get() { return instance; }
+    public static Apex i() { return instance; }
+    public static Apex getInstance() { return instance; }
 
     @Override
     public void onLoad() {
@@ -94,6 +91,7 @@ public class Apex extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        try { DB.i().close(); } catch (Throwable ignored) {}
         PacketEvents.getAPI().terminate();
         getLogger().info("Apex Anti-Cheat disabled.");
     }
@@ -202,6 +200,7 @@ public class Apex extends JavaPlugin implements Listener {
         alertStaff.add(player.getUniqueId());
         return true;
     }
+    public boolean togA(Player p) { return toggleAlerts(p); }
 
     public boolean toggleVerbose(Player player) {
         if (verboseStaff.contains(player.getUniqueId())) {
@@ -211,15 +210,21 @@ public class Apex extends JavaPlugin implements Listener {
         verboseStaff.add(player.getUniqueId());
         return true;
     }
+    public boolean togV(Player p) { return toggleVerbose(p); }
 
     public boolean alerts(Player player) {
         return alertStaff.contains(player.getUniqueId()) || player.hasPermission("apex.alerts");
     }
+    public boolean hasA(Player p) { return alerts(p); }
 
     public boolean verbose(Player player) {
         return verboseStaff.contains(player.getUniqueId());
     }
+    public boolean hasV(Player p) { return verbose(p); }
 
     public Data data() { return data; }
+    public Data d() { return data; }
     public Punish punish() { return punish; }
+    public Punish p() { return punish; }
+    public DB db() { return DB.i(); }
 }

@@ -22,6 +22,9 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT")
     implementation("com.github.retrooper:packetevents-spigot:2.13.0")
+    implementation("org.xerial:sqlite-jdbc:3.45.3.0")
+    implementation("com.zaxxer:HikariCP:5.1.0")
+    implementation("org.slf4j:slf4j-api:2.0.13")
 }
 
 tasks {
@@ -29,6 +32,9 @@ tasks {
         archiveClassifier.set("")
         relocate("com.github.retrooper.packetevents", "ac.apex.libs.packetevents")
         relocate("io.github.retrooper.packetevents", "ac.apex.libs.io.packetevents")
+        relocate("com.zaxxer.hikari", "ac.apex.libs.hikari")
+        relocate("org.sqlite", "ac.apex.libs.sqlite")
+        relocate("org.slf4j", "ac.apex.libs.slf4j")
     }
 
     build {

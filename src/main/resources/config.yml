@@ -1,6 +1,15 @@
 # Apex Anti-Cheat config
 prefix: "&#00f2fe&lAPEX &8» &7"
 
+db:
+  type: sqlite
+  file: "data.db"
+  host: "localhost"
+  port: 3306
+  name: "apex"
+  user: "root"
+  pass: ""
+
 alerts:
   permission: "apex.alerts"
   format: "&8[&#00f2fe&lAPEX&8] &b%player% &7failed &f%check% &8(&7VL: &b%vl%&8)"
