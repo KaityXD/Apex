@@ -30,6 +30,46 @@ checks:
       auto-ban: true
       max-vl: 30
       ban-duration: "30d"
+    strafe:
+      enabled: true
+      setback: true
+      auto-ban: true
+      max-vl: 10
+      ban-duration: "14d"
+    velocity:
+      enabled: true
+      auto-ban: true
+      max-vl: 6
+      ban-duration: "14d"
+    noslow:
+      enabled: true
+      setback: true
+      auto-ban: true
+      max-vl: 8
+      ban-duration: "14d"
+    inventory:
+      enabled: true
+      setback: true
+      auto-ban: true
+      max-vl: 6
+      ban-duration: "14d"
+    nofall:
+      enabled: true
+      auto-ban: true
+      max-vl: 5
+      ban-duration: "14d"
+    jesus:
+      enabled: true
+      setback: true
+      auto-ban: true
+      max-vl: 8
+      ban-duration: "14d"
+    fly:
+      enabled: true
+      setback: true
+      auto-ban: true
+      max-vl: 10
+      ban-duration: "30d"
     ground-spoof:
       enabled: true
       setback: true
@@ -95,3 +135,9 @@ checks:
       max-vl: 6
       ban-duration: "14d"
       exempt-scaffolding: true
+  misc:
+    badpackets:
+      enabled: true
+      auto-ban: true
+      max-vl: 5
+      ban-duration: "30d"

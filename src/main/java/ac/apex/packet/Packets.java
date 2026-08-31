@@ -1,11 +1,19 @@
 package ac.apex.packet;
 
 import ac.apex.Apex;
+import ac.apex.check.impl.badpackets.BadPacketsA;
 import ac.apex.check.impl.combat.aim.*;
 import ac.apex.check.impl.combat.autoclicker.*;
+import ac.apex.check.impl.movement.fly.FlyA;
 import ac.apex.check.impl.movement.ground.GroundSpoofA;
+import ac.apex.check.impl.movement.inventory.InventoryA;
+import ac.apex.check.impl.movement.jesus.JesusA;
 import ac.apex.check.impl.movement.motion.MotionA;
+import ac.apex.check.impl.movement.nofall.NoFallA;
+import ac.apex.check.impl.movement.noslow.NoSlowA;
+import ac.apex.check.impl.movement.strafe.StrafeA;
 import ac.apex.check.impl.movement.timer.TimerA;
+import ac.apex.check.impl.movement.velocity.VelocityA;
 import ac.apex.check.impl.world.block.BreakA;
 import ac.apex.check.impl.world.block.BreakB;
 import ac.apex.check.impl.world.block.PlaceA;
@@ -69,6 +77,7 @@ public class Packets implements PacketListener {
         } else if (e.getPacketType() == PacketType.Play.Client.PLAYER_DIGGING) {
             WrapperPlayClientPlayerDigging dig = new WrapperPlayClientPlayerDigging(e);
             DiggingAction action = dig.getAction();
+            if (action == DiggingAction.RELEASE_USE_ITEM) d.setUsingItem(false);
             if (action == DiggingAction.START_DIGGING || action == DiggingAction.FINISHED_DIGGING) {
                 Vector3i bp = dig.getBlockPosition();
                 try {
@@ -105,22 +114,49 @@ public class Packets implements PacketListener {
                 } catch (Throwable ignored) {}
                 PlaceB fast = d.get(PlaceB.class);
                 if (fast != null) fast.process(p, scaffold);
+                d.setUsingItem(false);
             } catch (Throwable ignored) {}
+        } else if (e.getPacketType() == PacketType.Play.Client.USE_ITEM) {
+            d.setUsingItem(true);
+        } else if (e.getPacketType() == PacketType.Play.Client.CLICK_WINDOW) {
+            d.setInventoryOpen(true);
+        } else if (e.getPacketType() == PacketType.Play.Client.CLOSE_WINDOW) {
+            d.setInventoryOpen(false);
+        } else if (e.getPacketType() == PacketType.Play.Client.HELD_ITEM_CHANGE) {
+            d.setInventoryOpen(false);
         }
     }
 
     private void pos(PlayerData d, double x, double y, double z, boolean g) {
         d.pos(x, y, z, g);
+        BadPacketsA bp = d.get(BadPacketsA.class);
+        if (bp != null) bp.process(x, y, z, d.yaw(), d.pitch(), g);
         TimerA t = d.get(TimerA.class);
         if (t != null) t.process();
         MotionA m = d.get(MotionA.class);
         if (m != null) m.process(d.dx(), d.dy(), d.dz(), g);
         GroundSpoofA gs = d.get(GroundSpoofA.class);
         if (gs != null) gs.process(d.dy(), g);
+        StrafeA strafe = d.get(StrafeA.class);
+        if (strafe != null) strafe.process(d.dx(), d.dz(), d.yaw());
+        VelocityA vel = d.get(VelocityA.class);
+        if (vel != null) vel.process(d.dx(), d.dz(), g);
+        NoSlowA ns = d.get(NoSlowA.class);
+        if (ns != null) ns.process(d.dx(), d.dz());
+        InventoryA inv = d.get(InventoryA.class);
+        if (inv != null) inv.process(d.dx(), d.dz());
+        NoFallA nf = d.get(NoFallA.class);
+        if (nf != null) nf.process(d.dy(), g);
+        JesusA js = d.get(JesusA.class);
+        if (js != null) js.process(d.dx(), d.dz(), g);
+        FlyA fly = d.get(FlyA.class);
+        if (fly != null) fly.process(d.dy(), g);
     }
 
     private void rot(PlayerData d, float yaw, float pitch) {
         d.rot(yaw, pitch);
+        BadPacketsA bp = d.get(BadPacketsA.class);
+        if (bp != null) bp.process(d.x(), d.y(), d.z(), yaw, pitch, d.ground());
         AimA a = d.get(AimA.class);
         if (a != null) a.process(d.dyaw(), d.dpitch());
         AimB b = d.get(AimB.class);

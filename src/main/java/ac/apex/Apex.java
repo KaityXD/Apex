@@ -131,7 +131,13 @@ public class Apex extends JavaPlugin implements Listener {
         Player p = e.getPlayer();
         if (p != null) {
             PlayerData pd = data.get(p);
-            if (pd != null) pd.markVelocity();
+            if (pd != null) {
+                pd.markVelocity();
+                try {
+                    ac.apex.check.impl.movement.velocity.VelocityA v = pd.get(ac.apex.check.impl.movement.velocity.VelocityA.class);
+                    if (v != null) v.onVelocity(e.getVelocity().getX(), e.getVelocity().getZ());
+                } catch (Throwable ignored) {}
+            }
         }
     }
 

@@ -12,6 +12,14 @@ import ac.apex.check.impl.combat.reach.ReachA;
 import ac.apex.check.impl.movement.ground.GroundSpoofA;
 import ac.apex.check.impl.movement.motion.MotionA;
 import ac.apex.check.impl.movement.timer.TimerA;
+import ac.apex.check.impl.badpackets.BadPacketsA;
+import ac.apex.check.impl.movement.fly.FlyA;
+import ac.apex.check.impl.movement.inventory.InventoryA;
+import ac.apex.check.impl.movement.jesus.JesusA;
+import ac.apex.check.impl.movement.nofall.NoFallA;
+import ac.apex.check.impl.movement.noslow.NoSlowA;
+import ac.apex.check.impl.movement.strafe.StrafeA;
+import ac.apex.check.impl.movement.velocity.VelocityA;
 import ac.apex.check.impl.world.block.BreakA;
 import ac.apex.check.impl.world.block.BreakB;
 import ac.apex.check.impl.world.block.PlaceA;
@@ -51,6 +59,8 @@ public class PlayerData {
     private volatile boolean cachedSpecialBlock = false;
     private volatile boolean cachedMovementPotion = false;
     private volatile double cachedMoveSpeed = 0.1;
+    private volatile boolean inventoryOpen = false;
+    private volatile boolean usingItem = false;
 
     public PlayerData(Player player) {
         this.p = player;
@@ -72,6 +82,14 @@ public class PlayerData {
         checks.add(new BreakB(this));
         checks.add(new PlaceA(this));
         checks.add(new PlaceB(this));
+        checks.add(new StrafeA(this));
+        checks.add(new VelocityA(this));
+        checks.add(new NoSlowA(this));
+        checks.add(new InventoryA(this));
+        checks.add(new NoFallA(this));
+        checks.add(new JesusA(this));
+        checks.add(new FlyA(this));
+        checks.add(new BadPacketsA(this));
     }
 
     public <T extends Check> T get(Class<T> clazz) {
@@ -198,6 +216,10 @@ public class PlayerData {
     public void setTeleporting(boolean t) { this.teleporting = t; }
     public void setLastAttack(long t) { this.lastAttack = t; }
     public void setLastSwing(long t) { this.lastSwing = t; }
+    public boolean isInventoryOpen() { return inventoryOpen; }
+    public void setInventoryOpen(boolean o) { this.inventoryOpen = o; }
+    public boolean isUsingItem() { return usingItem; }
+    public void setUsingItem(boolean u) { this.usingItem = u; }
 
     public void tickUpdate() {
         try { cachedFlying = p.isFlying(); } catch (Throwable ignored) {}
