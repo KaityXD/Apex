@@ -6,7 +6,7 @@ import ac.apex.check.CheckInfo;
 import ac.apex.data.PlayerData;
 import org.bukkit.entity.Player;
 
-@CheckInfo(name = "Timer", type = "A", description = "Lenient packet clock drift with lag compensation", category = Category.MOVEMENT)
+@CheckInfo(name = "Timer", type = "A", description = "Lenient packet clock drift with lag compensation", category = Category.MOVEMENT, config = "timer")
 public class TimerA extends Check {
     private long balance = 0;
     private long lastTime = 0;

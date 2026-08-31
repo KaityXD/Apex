@@ -7,7 +7,7 @@ import ac.apex.data.PlayerData;
 import ac.apex.util.Maths;
 import org.bukkit.entity.Player;
 
-@CheckInfo(name = "Velocity", type = "A", description = "Detects ignoring knockback", category = Category.MOVEMENT)
+@CheckInfo(name = "Velocity", type = "A", description = "Detects ignoring knockback", category = Category.MOVEMENT, config = "velocity")
 public class VelocityA extends Check {
     private double buf = 0.0;
     private long velocityTime = 0;

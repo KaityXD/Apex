@@ -6,7 +6,7 @@ import ac.apex.check.CheckInfo;
 import ac.apex.data.PlayerData;
 import org.bukkit.entity.Player;
 
-@CheckInfo(name = "NoFall", type = "A", description = "Detects avoiding fall damage", category = Category.MOVEMENT)
+@CheckInfo(name = "NoFall", type = "A", description = "Detects avoiding fall damage", category = Category.MOVEMENT, config = "nofall")
 public class NoFallA extends Check {
     private double fallDistance = 0.0;
     private double buf = 0.0;

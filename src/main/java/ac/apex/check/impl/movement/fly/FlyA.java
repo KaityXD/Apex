@@ -6,7 +6,7 @@ import ac.apex.check.CheckInfo;
 import ac.apex.data.PlayerData;
 import org.bukkit.entity.Player;
 
-@CheckInfo(name = "Fly", type = "A", description = "Detects flying without permission", category = Category.MOVEMENT)
+@CheckInfo(name = "Fly", type = "A", description = "Detects flying without permission", category = Category.MOVEMENT, config = "fly")
 public class FlyA extends Check {
     private double buf = 0.0;
     private int airTicks = 0;
@@ -46,14 +46,14 @@ public class FlyA extends Check {
                     debug(String.format("fly dy=%.3f air=%d buf=%.1f", dy, airTicks, buf));
                     if (buf >= 6.0) {
                         fail(String.format("dy=%.3f air=%d ping=%d", dy, airTicks, ping), 1.0);
-                        data.setback();
+                        setback();
                         buf = 3.0;
                     }
                 } else if (dy > -0.06 && airTicks > 20) {
                     buf += 0.7;
                     if (buf >= 8.0) {
                         fail(String.format("hover dy=%.3f air=%d ping=%d", dy, airTicks, ping), 1.0);
-                        data.setback();
+                        setback();
                         buf = 3.0;
                     }
                 } else {

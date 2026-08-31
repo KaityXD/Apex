@@ -8,7 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
-@CheckInfo(name = "Aura", type = "A", description = "Detects attacks outside field of view", category = Category.COMBAT)
+@CheckInfo(name = "Aura", type = "A", description = "Detects attacks outside field of view", category = Category.COMBAT, config = "aura")
 public class AuraA extends Check {
     private double buf = 0.0;
     private long lastFlag = 0;

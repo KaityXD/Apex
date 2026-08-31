@@ -7,7 +7,7 @@ import ac.apex.data.PlayerData;
 import ac.apex.util.Maths;
 import org.bukkit.entity.Player;
 
-@CheckInfo(name = "Inventory", type = "A", description = "Detects moving with inventory open", category = Category.MOVEMENT)
+@CheckInfo(name = "Inventory", type = "A", description = "Detects moving with inventory open", category = Category.MOVEMENT, config = "inventory")
 public class InventoryA extends Check {
     private double buf = 0.0;
 
@@ -40,7 +40,7 @@ public class InventoryA extends Check {
         debug(String.format("inventory hDist=%.3f buf=%.1f ping=%d", hDist, buf, ping));
         if (buf >= 4.0) {
             fail(String.format("hDist=%.3f ping=%d", hDist, ping), 1.0);
-            data.setback();
+            setback();
             buf = 2.0;
         }
     }

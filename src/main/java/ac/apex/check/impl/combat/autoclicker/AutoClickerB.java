@@ -5,7 +5,7 @@ import ac.apex.check.Check;
 import ac.apex.check.CheckInfo;
 import ac.apex.data.PlayerData;
 
-@CheckInfo(name = "AutoClicker", type = "B", description = "Checks for impossible double click frequencies", category = Category.COMBAT)
+@CheckInfo(name = "AutoClicker", type = "B", description = "Checks for impossible double click frequencies", category = Category.COMBAT, config = "click-entropy")
 public class AutoClickerB extends Check {
     private long lastClick = 0;
     private int buf = 0;

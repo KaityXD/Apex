@@ -5,7 +5,7 @@ import ac.apex.check.Check;
 import ac.apex.check.CheckInfo;
 import ac.apex.data.PlayerData;
 
-@CheckInfo(name = "BadPackets", type = "A", description = "Detects invalid packets", category = Category.MISC)
+@CheckInfo(name = "BadPackets", type = "A", description = "Detects invalid packets", category = Category.MISC, config = "badpackets")
 public class BadPacketsA extends Check {
     private double buf = 0.0;
 
@@ -25,7 +25,7 @@ public class BadPacketsA extends Check {
             reason = String.format("pitch=%.1f", pitch);
         } else if (Double.isNaN(x) || Double.isNaN(y) || Double.isNaN(z) || Double.isInfinite(x) || Double.isInfinite(y) || Double.isInfinite(z)) {
             invalid = true;
-            reason = "nan position";
+            reason = "nan pos";
         } else if (Math.abs(x) > 3.0E7 || Math.abs(z) > 3.0E7) {
             invalid = true;
             reason = "out of bounds";

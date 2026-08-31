@@ -166,7 +166,7 @@ public class Command implements CommandExecutor, TabCompleter {
                 "&8&m--------------------------------------------------\n" +
                 " &7• Client Version: &f%s\n" +
                 " &7• Transaction Ping: &b%d ms\n" +
-                " &7• Position: &f(%.2f, %.2f, %.2f)\n" +
+                 " &7• Pos: &f(%.2f, %.2f, %.2f)\n" +
                 " &7• Ground State: &f%s &8(Last: %s)\n" +
                 " &7• Status: &f%s &8| &f%s\n" +
                 "&8&m--------------------------------------------------",

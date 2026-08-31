@@ -6,7 +6,7 @@ import ac.apex.check.CheckInfo;
 import ac.apex.data.PlayerData;
 import org.bukkit.entity.Player;
 
-@CheckInfo(name = "Break", type = "B", description = "Detects breaking blocks too quickly", category = Category.WORLD)
+@CheckInfo(name = "Break", type = "B", description = "Detects breaking blocks too quickly", category = Category.WORLD, config = "break-fast")
 public class BreakB extends Check {
     private long lastBreak = 0;
     private double buf = 0.0;

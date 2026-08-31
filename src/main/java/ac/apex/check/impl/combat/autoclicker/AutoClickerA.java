@@ -9,7 +9,7 @@ import ac.apex.util.Maths;
 import java.util.ArrayList;
 import java.util.List;
 
-@CheckInfo(name = "AutoClicker", type = "A", description = "Checks for abnormal click delay distribution kurtosis", category = Category.COMBAT)
+@CheckInfo(name = "AutoClicker", type = "A", description = "Checks for abnormal click delay distribution kurtosis", category = Category.COMBAT, config = "click-entropy")
 public class AutoClickerA extends Check {
     private final List<Double> samples = new ArrayList<>();
     private long lastClick = 0;

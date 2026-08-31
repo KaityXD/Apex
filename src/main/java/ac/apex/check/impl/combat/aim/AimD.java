@@ -9,7 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
-@CheckInfo(name = "Aim", type = "D", description = "Detects perfect aim lock with configurable offset", category = Category.COMBAT)
+@CheckInfo(name = "Aim", type = "D", description = "Detects perfect aim lock with configurable offset", category = Category.COMBAT, config = "aim-precision")
 public class AimD extends Check {
     private double buf = 0.0;
     private long lastFlag = 0;

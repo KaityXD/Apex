@@ -8,7 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-@CheckInfo(name = "GroundSpoof", type = "A", description = "Lenient on-ground spoof with block-aware exemptions", category = Category.MOVEMENT)
+@CheckInfo(name = "GroundSpoof", type = "A", description = "Lenient on-ground spoof with block-aware exemptions", category = Category.MOVEMENT, config = "ground-spoof")
 public class GroundSpoofA extends Check {
     private int buf = 0;
 

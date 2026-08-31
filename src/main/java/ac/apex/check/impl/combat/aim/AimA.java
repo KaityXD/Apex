@@ -6,7 +6,7 @@ import ac.apex.check.CheckInfo;
 import ac.apex.data.PlayerData;
 import ac.apex.util.Maths;
 
-@CheckInfo(name = "Aim", type = "A", description = "Checks for mouse sensitivity GCD quantization", category = Category.COMBAT)
+@CheckInfo(name = "Aim", type = "A", description = "Checks for mouse sensitivity GCD quantization", category = Category.COMBAT, config = "rotation-gcd")
 public class AimA extends Check {
     private double prevGcd = 0.0, buf = 0.0;
 

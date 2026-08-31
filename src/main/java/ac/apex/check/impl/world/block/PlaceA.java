@@ -8,7 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
-@CheckInfo(name = "Place", type = "A", description = "Detects placing blocks outside field of view", category = Category.WORLD)
+@CheckInfo(name = "Place", type = "A", description = "Detects placing blocks outside field of view", category = Category.WORLD, config = "place")
 public class PlaceA extends Check {
     private double buf = 0.0;
     private long lastFlag = 0;

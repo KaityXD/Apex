@@ -9,7 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-@CheckInfo(name = "Jesus", type = "A", description = "Detects walking on water", category = Category.MOVEMENT)
+@CheckInfo(name = "Jesus", type = "A", description = "Detects walking on water", category = Category.MOVEMENT, config = "jesus")
 public class JesusA extends Check {
     private double buf = 0.0;
     private int waterTicks = 0;
@@ -55,7 +55,7 @@ public class JesusA extends Check {
                 debug(String.format("jesus hDist=%.3f ticks=%d buf=%.1f", hDist, waterTicks, buf));
                 if (buf >= 5.0) {
                     fail(String.format("hDist=%.3f ticks=%d ping=%d", hDist, waterTicks, ping), 1.0);
-                    data.setback();
+                    setback();
                     buf = 2.0;
                 }
             }

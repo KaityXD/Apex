@@ -66,9 +66,9 @@ public class Apex extends JavaPlugin implements Listener {
 
         Platform.timer(this, () -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
-                PlayerData playerProfile = data.get(player);
-                if (playerProfile != null) {
-                    playerProfile.ping().send();
+                PlayerData pd = data.get(player);
+                if (pd != null) {
+                    pd.ping().send();
                 }
             }
         }, 20L, 20L);

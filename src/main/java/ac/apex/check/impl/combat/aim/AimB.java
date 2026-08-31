@@ -5,7 +5,7 @@ import ac.apex.check.Check;
 import ac.apex.check.CheckInfo;
 import ac.apex.data.PlayerData;
 
-@CheckInfo(name = "Aim", type = "B", description = "Checks for sudden multi-tick rotation acceleration", category = Category.COMBAT)
+@CheckInfo(name = "Aim", type = "B", description = "Checks for sudden multi-tick rotation acceleration", category = Category.COMBAT, config = "rotation-snap")
 public class AimB extends Check {
     private double lastDelta = 0.0, prevDelta = 0.0;
 

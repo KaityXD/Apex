@@ -12,5 +12,6 @@ public @interface CheckInfo {
     String type() default "A";
     String description() default "";
     Category category();
+    String config() default "";
     boolean experimental() default false;
 }

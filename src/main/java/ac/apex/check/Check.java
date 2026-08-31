@@ -19,6 +19,7 @@ public abstract class Check {
     private double maxVl = 20.0;
     private boolean enabled = true;
     private boolean autoBan = true;
+    private boolean setback = true;
     private String duration = "30d";
 
     public Check(PlayerData data) {
@@ -29,12 +30,31 @@ public abstract class Check {
             this.type = info.type();
             this.cat = info.category();
             this.desc = info.description();
+            loadConfig(info.config());
         } else {
             this.name = getClass().getSimpleName();
             this.type = "A";
             this.cat = Category.MISC;
             this.desc = "";
         }
+    }
+
+    private void loadConfig(String key) {
+        if (key == null || key.isEmpty()) return;
+        Apex plugin = Apex.get();
+        if (plugin == null) return;
+        try {
+            String base = "checks." + cat.name().toLowerCase() + "." + key + ".";
+            if (plugin.getConfig().contains(base + "enabled")) this.enabled = plugin.getConfig().getBoolean(base + "enabled");
+            if (plugin.getConfig().contains(base + "auto-ban")) this.autoBan = plugin.getConfig().getBoolean(base + "auto-ban");
+            if (plugin.getConfig().contains(base + "setback")) this.setback = plugin.getConfig().getBoolean(base + "setback");
+            if (plugin.getConfig().contains(base + "max-vl")) this.maxVl = plugin.getConfig().getDouble(base + "max-vl");
+            if (plugin.getConfig().contains(base + "ban-duration")) this.duration = plugin.getConfig().getString(base + "ban-duration");
+        } catch (Throwable ignored) {}
+    }
+
+    protected void setback() {
+        if (setback) data.setback();
     }
 
     public String tag() { return name + " (" + type + ")"; }

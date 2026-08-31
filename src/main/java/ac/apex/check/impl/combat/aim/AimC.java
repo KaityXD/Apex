@@ -6,7 +6,7 @@ import ac.apex.check.CheckInfo;
 import ac.apex.data.PlayerData;
 import ac.apex.util.Maths;
 
-@CheckInfo(name = "Aim", type = "C", description = "Checks for silent aim rotation direction inversion", category = Category.COMBAT)
+@CheckInfo(name = "Aim", type = "C", description = "Checks for silent aim rotation direction inversion", category = Category.COMBAT, config = "rotation-snap")
 public class AimC extends Check {
     private float lastYaw = 0.0f;
 

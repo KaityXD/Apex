@@ -6,7 +6,7 @@ import ac.apex.check.CheckInfo;
 import ac.apex.data.PlayerData;
 import org.bukkit.entity.Player;
 
-@CheckInfo(name = "Place", type = "B", description = "Detects placing too many blocks per tick", category = Category.WORLD)
+@CheckInfo(name = "Place", type = "B", description = "Detects placing too many blocks per tick", category = Category.WORLD, config = "place-fast")
 public class PlaceB extends Check {
     private long lastPlace = 0;
     private double buf = 0.0;

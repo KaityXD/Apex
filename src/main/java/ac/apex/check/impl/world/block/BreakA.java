@@ -8,7 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
-@CheckInfo(name = "Break", type = "A", description = "Detects breaking blocks outside field of view", category = Category.WORLD)
+@CheckInfo(name = "Break", type = "A", description = "Detects breaking blocks outside field of view", category = Category.WORLD, config = "break")
 public class BreakA extends Check {
     private double buf = 0.0;
     private long lastFlag = 0;

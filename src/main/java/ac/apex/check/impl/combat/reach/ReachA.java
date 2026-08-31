@@ -8,7 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
-@CheckInfo(name = "Reach", type = "A", description = "Checks for extended attack distance with lag compensation", category = Category.COMBAT)
+@CheckInfo(name = "Reach", type = "A", description = "Checks for extended attack distance with lag compensation", category = Category.COMBAT, config = "reach")
 public class ReachA extends Check {
 
     private double buf = 0.0;
@@ -26,9 +26,6 @@ public class ReachA extends Check {
             buf = Math.max(0, buf - 0.5);
             return;
         }
-        try {
-            if (attacker.isGliding() || attacker.isSwimming() || attacker.isSprinting() == false) { }
-        } catch (Throwable ignored) {}
 
         long ping = data.ping().ms();
         if (ping > 320) {
@@ -40,9 +37,6 @@ public class ReachA extends Check {
         if (eye.getWorld() != victimLoc.getWorld()) {
             buf = Math.max(0, buf - 0.5);
             return;
-        }
-
-        if (System.currentTimeMillis() - data.lastAttack() > 6000) {
         }
 
         double w = victimWidth > 0 ? victimWidth : 0.6;
