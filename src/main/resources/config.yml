@@ -79,8 +79,19 @@ checks:
       auto-ban: true
       max-vl: 6
       ban-duration: "14d"
+    break-fast:
+      enabled: true
+      auto-ban: true
+      max-vl: 6
+      ban-duration: "14d"
     place:
       enabled: true
       auto-ban: true
       max-vl: 6
       ban-duration: "14d"
+    place-fast:
+      enabled: true
+      auto-ban: true
+      max-vl: 6
+      ban-duration: "14d"
+      exempt-scaffolding: true

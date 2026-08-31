@@ -7,7 +7,9 @@ import ac.apex.check.impl.movement.ground.GroundSpoofA;
 import ac.apex.check.impl.movement.motion.MotionA;
 import ac.apex.check.impl.movement.timer.TimerA;
 import ac.apex.check.impl.world.block.BreakA;
+import ac.apex.check.impl.world.block.BreakB;
 import ac.apex.check.impl.world.block.PlaceA;
+import ac.apex.check.impl.world.block.PlaceB;
 import ac.apex.data.PlayerData;
 import com.github.retrooper.packetevents.event.PacketListener;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
@@ -73,6 +75,8 @@ public class Packets implements PacketListener {
                     Location loc = new Location(p.getWorld(), bp.getX(), bp.getY(), bp.getZ());
                     BreakA check = d.get(BreakA.class);
                     if (check != null) check.process(p, loc);
+                    BreakB fast = d.get(BreakB.class);
+                    if (fast != null) fast.process(p);
                 } catch (Throwable ignored) {}
             }
         } else if (e.getPacketType() == PacketType.Play.Client.PLAYER_BLOCK_PLACEMENT) {
@@ -87,6 +91,20 @@ public class Packets implements PacketListener {
                 } catch (Throwable ignored) {}
                 PlaceA check = d.get(PlaceA.class);
                 if (check != null) check.process(p, target);
+                boolean scaffold = false;
+                try {
+                    java.util.Optional<com.github.retrooper.packetevents.protocol.item.ItemStack> opt = place.getItemStack();
+                    if (opt.isPresent()) {
+                        com.github.retrooper.packetevents.protocol.item.ItemStack stack = opt.get();
+                        if (!stack.isEmpty()) {
+                            String n = stack.getType().getName().toString();
+                            if (n != null && n.toLowerCase().contains("scaffolding")) scaffold = true;
+                            else if (stack.getType() == com.github.retrooper.packetevents.protocol.item.type.ItemTypes.SCAFFOLDING) scaffold = true;
+                        }
+                    }
+                } catch (Throwable ignored) {}
+                PlaceB fast = d.get(PlaceB.class);
+                if (fast != null) fast.process(p, scaffold);
             } catch (Throwable ignored) {}
         }
     }
