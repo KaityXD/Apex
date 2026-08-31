@@ -1,9 +1,12 @@
 package ac.apex.db;
 
 import ac.apex.punish.Ban;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.bukkit.plugin.Plugin;
 
-import java.io.File;
+import java.io.*;
+import java.lang.reflect.Type;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,6 +17,9 @@ public final class DB {
     private String user;
     private String pass;
     private boolean sqlite;
+    private boolean fallback;
+    private File file;
+    private final Gson gson = new Gson();
 
     private DB() {}
 
@@ -26,14 +32,22 @@ public final class DB {
         close();
         String type = pl.getConfig().getString("db.type", "sqlite");
         sqlite = type == null || type.equalsIgnoreCase("sqlite");
+        fallback = false;
+        file = new File(pl.getDataFolder(), "data/bans.json");
         if (sqlite) {
-            String file = pl.getConfig().getString("db.file", "data.db");
-            File f = new File(pl.getDataFolder(), file);
+            String fn = pl.getConfig().getString("db.file", "data.db");
+            File f = new File(pl.getDataFolder(), fn);
             f.getParentFile().mkdirs();
             url = "jdbc:sqlite:" + f.getAbsolutePath();
             user = "";
             pass = "";
-            try { Class.forName("org.sqlite.JDBC"); } catch (Throwable ignored) {}
+            try {
+                Class.forName("org.sqlite.JDBC");
+                try (Connection c = DriverManager.getConnection(url)) { c.close(); }
+            } catch (Throwable e) {
+                fallback = true;
+                url = null;
+            }
         } else {
             String host = pl.getConfig().getString("db.host", "localhost");
             int port = pl.getConfig().getInt("db.port", 3306);
@@ -41,12 +55,19 @@ public final class DB {
             user = pl.getConfig().getString("db.user", "root");
             pass = pl.getConfig().getString("db.pass", "");
             url = "jdbc:mysql://" + host + ":" + port + "/" + name + "?useSSL=false&autoReconnect=true&characterEncoding=utf8";
-            try { Class.forName("com.mysql.cj.jdbc.Driver"); } catch (Throwable ignored) {}
+            try {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                try (Connection c = DriverManager.getConnection(url, user, pass)) { c.close(); }
+            } catch (Throwable e) {
+                fallback = true;
+                url = null;
+            }
         }
-        mk();
+        if (!fallback) mk();
     }
 
     private void mk() {
+        if (fallback) return;
         String sql = "CREATE TABLE IF NOT EXISTS bans (" +
                 "id TEXT PRIMARY KEY," +
                 "uuid TEXT NOT NULL," +
@@ -59,17 +80,18 @@ public final class DB {
         try (Connection c = con(); Statement s = c.createStatement()) {
             s.execute(sql);
         } catch (SQLException e) {
-            e.printStackTrace();
+            fallback = true;
         }
     }
 
     public Connection con() throws SQLException {
-        if (url == null) throw new SQLException("db not init");
+        if (fallback || url == null) throw new SQLException("db fallback");
         if (sqlite) return DriverManager.getConnection(url);
         return DriverManager.getConnection(url, user, pass);
     }
 
     public void add(Ban b) {
+        if (fallback) { fbAdd(b); return; }
         String sql = sqlite ?
                 "INSERT OR REPLACE INTO bans(id,uuid,name,reason,checkName,time,expiry) VALUES(?,?,?,?,?,?,?)" :
                 "REPLACE INTO bans(id,uuid,name,reason,checkName,time,expiry) VALUES(?,?,?,?,?,?,?)";
@@ -83,43 +105,45 @@ public final class DB {
             ps.setLong(7, b.expiry());
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            fbAdd(b);
         }
     }
 
     public boolean del(UUID uuid) {
+        if (fallback) return fbDel(uuid);
         try (Connection c = con(); PreparedStatement ps = c.prepareStatement("DELETE FROM bans WHERE uuid=?")) {
             ps.setString(1, uuid.toString());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            return fbDel(uuid);
         }
     }
 
     public boolean del(String name) {
+        if (fallback) return fbDel(name);
         try (Connection c = con(); PreparedStatement ps = c.prepareStatement("DELETE FROM bans WHERE LOWER(name)=LOWER(?)")) {
             ps.setString(1, name);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
+            return fbDel(name);
         }
     }
 
     public Ban get(UUID uuid) {
+        if (fallback) return fbGet(uuid);
         try (Connection c = con(); PreparedStatement ps = c.prepareStatement("SELECT * FROM bans WHERE uuid=?")) {
             ps.setString(1, uuid.toString());
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return map(rs);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            return fbGet(uuid);
         }
         return null;
     }
 
     public Map<UUID, Ban> all() {
+        if (fallback) return fbAll();
         Map<UUID, Ban> m = new ConcurrentHashMap<>();
         try (Connection c = con(); Statement s = c.createStatement(); ResultSet rs = s.executeQuery("SELECT * FROM bans")) {
             while (rs.next()) {
@@ -127,7 +151,7 @@ public final class DB {
                 m.put(b.uuid(), b);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            return fbAll();
         }
         return m;
     }
@@ -144,9 +168,54 @@ public final class DB {
         );
     }
 
+    private synchronized void fbAdd(Ban b) {
+        Map<UUID, Ban> m = fbAll();
+        m.put(b.uuid(), b);
+        fbSave(m);
+    }
+
+    private synchronized boolean fbDel(UUID uuid) {
+        Map<UUID, Ban> m = fbAll();
+        if (m.remove(uuid) != null) { fbSave(m); return true; }
+        return false;
+    }
+
+    private synchronized boolean fbDel(String name) {
+        Map<UUID, Ban> m = fbAll();
+        boolean r = false;
+        Iterator<Map.Entry<UUID, Ban>> it = m.entrySet().iterator();
+        while (it.hasNext()) {
+            if (it.next().getValue().name().equalsIgnoreCase(name)) { it.remove(); r = true; }
+        }
+        if (r) fbSave(m);
+        return r;
+    }
+
+    private synchronized Ban fbGet(UUID uuid) { return fbAll().get(uuid); }
+
+    private synchronized Map<UUID, Ban> fbAll() {
+        if (!file.exists()) return new ConcurrentHashMap<>();
+        try (FileReader r = new FileReader(file)) {
+            Type t = new TypeToken<Map<UUID, Ban>>() {}.getType();
+            Map<UUID, Ban> d = gson.fromJson(r, t);
+            if (d != null) return new ConcurrentHashMap<>(d);
+        } catch (Exception ignored) {}
+        return new ConcurrentHashMap<>();
+    }
+
+    private synchronized void fbSave(Map<UUID, Ban> m) {
+        try {
+            if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
+            try (FileWriter w = new FileWriter(file)) { gson.toJson(m, w); }
+        } catch (Exception ignored) {}
+    }
+
     public void close() {
         url = null;
         user = null;
         pass = null;
+        fallback = false;
     }
+
+    public boolean isFallback() { return fallback; }
 }
