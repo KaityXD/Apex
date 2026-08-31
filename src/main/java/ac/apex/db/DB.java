@@ -1,9 +1,6 @@
 package ac.apex.db;
 
-import ac.apex.Apex;
 import ac.apex.punish.Ban;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
@@ -13,7 +10,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class DB {
     private static DB inst;
-    private HikariDataSource ds;
+    private String url;
+    private String user;
+    private String pass;
     private boolean sqlite;
 
     private DB() {}
@@ -31,27 +30,18 @@ public final class DB {
             String file = pl.getConfig().getString("db.file", "data.db");
             File f = new File(pl.getDataFolder(), file);
             f.getParentFile().mkdirs();
-            HikariConfig c = new HikariConfig();
-            c.setJdbcUrl("jdbc:sqlite:" + f.getAbsolutePath());
-            c.setMaximumPoolSize(1);
-            c.setConnectionTimeout(5000);
-            c.setPoolName("apex-sqlite");
-            ds = new HikariDataSource(c);
+            url = "jdbc:sqlite:" + f.getAbsolutePath();
+            user = "";
+            pass = "";
+            try { Class.forName("org.sqlite.JDBC"); } catch (Throwable ignored) {}
         } else {
             String host = pl.getConfig().getString("db.host", "localhost");
             int port = pl.getConfig().getInt("db.port", 3306);
             String name = pl.getConfig().getString("db.name", "apex");
-            String user = pl.getConfig().getString("db.user", "root");
-            String pass = pl.getConfig().getString("db.pass", "");
-            HikariConfig c = new HikariConfig();
-            c.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + name + "?useSSL=false&autoReconnect=true&characterEncoding=utf8");
-            c.setUsername(user);
-            c.setPassword(pass);
-            c.setMaximumPoolSize(4);
-            c.setMinimumIdle(1);
-            c.setConnectionTimeout(5000);
-            c.setPoolName("apex-mysql");
-            ds = new HikariDataSource(c);
+            user = pl.getConfig().getString("db.user", "root");
+            pass = pl.getConfig().getString("db.pass", "");
+            url = "jdbc:mysql://" + host + ":" + port + "/" + name + "?useSSL=false&autoReconnect=true&characterEncoding=utf8";
+            try { Class.forName("com.mysql.cj.jdbc.Driver"); } catch (Throwable ignored) {}
         }
         mk();
     }
@@ -65,6 +55,7 @@ public final class DB {
                 "checkName TEXT," +
                 "time BIGINT," +
                 "expiry BIGINT)";
+        if (!sqlite) sql = sql.replace("TEXT PRIMARY KEY", "VARCHAR(32) PRIMARY KEY").replace("TEXT NOT NULL", "VARCHAR(36) NOT NULL");
         try (Connection c = con(); Statement s = c.createStatement()) {
             s.execute(sql);
         } catch (SQLException e) {
@@ -73,8 +64,9 @@ public final class DB {
     }
 
     public Connection con() throws SQLException {
-        if (ds == null) throw new SQLException("db not init");
-        return ds.getConnection();
+        if (url == null) throw new SQLException("db not init");
+        if (sqlite) return DriverManager.getConnection(url);
+        return DriverManager.getConnection(url, user, pass);
     }
 
     public void add(Ban b) {
@@ -153,9 +145,8 @@ public final class DB {
     }
 
     public void close() {
-        if (ds != null) {
-            try { ds.close(); } catch (Exception ignored) {}
-            ds = null;
-        }
+        url = null;
+        user = null;
+        pass = null;
     }
 }
